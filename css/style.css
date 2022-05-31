@@ -23,7 +23,7 @@
 
 @font-face {
     font-family: 'Ubuntu-Regular';
-    src: url('./font/Ubuntu-Regular.TTF');
+    src: url('./font/Ubuntu-Regular.ttf');
 }
 
 .iconfont {
