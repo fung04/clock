@@ -1,4 +1,4 @@
-window.onload = function() {
+window.onload = function () {
     if (rotation_mode !== "") {
         rotation_mode = Number(rotation_mode);
         rotation_mode = rotation_mode === 0 ? 3 : rotation_mode - 1;
@@ -22,6 +22,9 @@ window.onload = function() {
     addEvent(bg_autoMode);
     // hitokoto()
     // hitokoto_timer = setInterval("hitokoto()", 60 * 1000 * 60)
+
+    holiday()
+    holiday_timer = setInterval("holiday()", 60 * 1000 * 60 * 24)
     clock(bg_autoMode);
     time_timer = setInterval("clock(" + bg_autoMode + ")", 60 * 1000)
 };
@@ -35,12 +38,14 @@ var bg_autoMode = false;
 var bg_mode = getCookie("bg_mode");
 var rotation_mode = getCookie("rotation_mode");
 var hour24 = getCookie("hour24");
+var date = new Date();
 // var hitokoto_timer = null;
+var holiday_timer = null;
 var time_timer = null;
 var autoModeImg = "&#xe8e3";
 
 
-// function createXHR() { var xhr = null; if (window.XMLHttpRequest) { xhr = new XMLHttpRequest() } else { if (window.ActiveXObject) { xhr = new ActiveXObject("Microsoft.XMLHTTP") } } return xhr }
+function createXHR() { var xhr = null; if (window.XMLHttpRequest) { xhr = new XMLHttpRequest() } else { if (window.ActiveXObject) { xhr = new ActiveXObject("Microsoft.XMLHTTP") } } return xhr }
 
 // function hitokoto() {
 //     console.log("hitokoto update");
@@ -62,8 +67,29 @@ var autoModeImg = "&#xe8e3";
 //     xhr.send(null)
 // }
 
+function holiday() {
+    console.log("holiday update");
+    var xhr = createXHR();
+    xhr.open("GET", "js/msia_holidays.json", true);
+    xhr.onreadystatechange = function () {
+        if (this.readyState == 4) {
+            var holiday_my = JSON.parse(this.responseText);
+            console.log(holiday_my);
+
+            for (var i in holiday_my) {
+                var holiday_date = new Date(i);
+                if (holiday_date.getFullYear() === date.getFullYear() && holiday_date.getMonth() === date.getMonth() && holiday_date.getDate() === date.getDate()){
+                    document.getElementById("holiday").innerHTML = holiday_my[i];
+                }
+            }
+        }
+    };
+    xhr.send(null)
+}
+
+
+
 function clock(autoMode) {
-    var date = new Date();
     var utc8DiffMinutes = date.getTimezoneOffset() + 480;
     date.setMinutes(date.getMinutes() + utc8DiffMinutes);
     var MM = date.getMonth() + 1;
@@ -97,10 +123,11 @@ function clock(autoMode) {
     } else { document.getElementById("apm").innerHTML = "" }
     if (hour < 10) { hour = "0" + hour }
     var timeString = hour + ":" + ("0" + minutes).slice(-2);
-    const monthList = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const monthList = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const weekList = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-   
+
     var dateString = dd + " " + monthList[MM - 1];
+
     document.getElementById("time").innerHTML = timeString;
     document.getElementById("date").innerHTML = dateString + ", " + weekList[day]
 }
@@ -175,7 +202,7 @@ function changeBgMode() {
             var middle = document.getElementById("middle");
             icon.style.visibility = "visible";
             middle.style.visibility = "hidden";
-            setTimeout(function() {
+            setTimeout(function () {
                 icon.style.visibility = "hidden";
                 middle.style.visibility = "visible"
             }, 1000)
@@ -184,7 +211,7 @@ function changeBgMode() {
 }
 
 function addEvent(autoMode) {
-    document.getElementById("apmOuterWrapper").addEventListener("click", function() {
+    document.getElementById("apmOuterWrapper").addEventListener("click", function () {
         console.log("hourCycle change");
         hour24 = !hour24;
         setCookie("hour24", hour24, 30);
